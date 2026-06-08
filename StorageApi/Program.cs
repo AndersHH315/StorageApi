@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 
 namespace StorageApi
 {
@@ -6,6 +7,9 @@ namespace StorageApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var connectionString = builder.Configuration.GetConnectionString("StorageApiContext") ?? throw new InvalidOperationException("Connection string 'StorageApiContext' not found.");
+
+            builder.Services.AddDbContext<StorageApiContext>(options => options.UseSqlServer(connectionString));
 
             // Add services to the container.
 
