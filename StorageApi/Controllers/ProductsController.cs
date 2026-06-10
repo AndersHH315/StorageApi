@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StorageApi.Models;
+using StorageApi.DTOs;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -14,23 +15,38 @@ public class ProductsController : ControllerBase
 
     // GET: api/Product
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProduct()
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct()
     {
-        return await _context.Product.ToListAsync();
+        var products = from p in _context.Product
+                       select new ProductDto
+                       {
+                           Id = p.Id,
+                           Name = p.Name,
+                           Price = p.Price,
+                           Count = p.Count
+
+                       };
+        return await products.ToListAsync();
     }
 
     // GET: api/Product/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
-        var product = await _context.Product.FindAsync(id);
+        var product = await _context.Product.Select(p => new ProductDto { 
+            Id = p.Id,
+            Name = p.Name,
+            Price = p.Price,
+            Count = p.Count
+
+        }).SingleOrDefaultAsync(p => p.Id == id);
 
         if (product == null)
         {
             return NotFound();
         }
 
-        return product;
+        return Ok(product);
     }
 
     // PUT: api/Product/5
@@ -38,6 +54,7 @@ public class ProductsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutProduct(int? id, Product product)
     {
+       
         if (id != product.Id)
         {
             return BadRequest();
@@ -67,7 +84,7 @@ public class ProductsController : ControllerBase
     // POST: api/Product
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Product>> PostProduct(Product product)
+    public async Task<ActionResult<CreateProductDto>> PostProduct(Product product)
     {
         _context.Product.Add(product);
         await _context.SaveChangesAsync();
@@ -93,6 +110,6 @@ public class ProductsController : ControllerBase
 
     private bool ProductExists(int? id)
     {
-        return _context.Product.Any(e => e.Id == id);
+        return _context.Product.Select(e => new ProductDto { Id = e.Id}).Any(e => e.Id == id);
     }
 }
