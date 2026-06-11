@@ -12,10 +12,12 @@ public class ProductDto
     public string Name { get; set; } = string.Empty;
     [Required]
     [Range(1, 50, ErrorMessage = "The price range needs to be between 1-50!")]
-    public int Price { get; set; }
+    public double Price { get; set; }
+    public string? Category { get; set; }
+    public string? Shelf { get; set; }
     [Required]
     [Range(1, 100, ErrorMessage = "Stock value can only be between 1-100!")]
     public int Count { get; set; }
 
-    public int InventoryVaule => Price * Count; 
+    public double InventoryValue => Price * Count;
 }
